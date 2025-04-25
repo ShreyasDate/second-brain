@@ -1,0 +1,1 @@
+1. In signup endoint , if username is same and password is different but smaller than 3 letters, then as usual zod throws error, but username is not unique and hence duplicate entry error must be thrown before zod error. 

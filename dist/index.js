@@ -15,51 +15,78 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const db_1 = require("./db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const zodValidation_1 = require("./zodValidation");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const JWT_SECRET = "ahdjfauregfgafrgayg";
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const username = req.body.username;
-    const password = req.body.password;
-    try {
-        yield db_1.UserModel.create({
-            username: username,
-            password: password
-        });
-        res.status(200).json({
-            message: "sign in successful"
-        });
+    const usernameResult = zodValidation_1.usernameSchema.safeParse(req.body.username);
+    const passwordResult = zodValidation_1.passwordSchema.safeParse(req.body.password);
+    if (usernameResult.success && passwordResult.success) {
+        const hashedPassword = yield bcrypt_1.default.hash(passwordResult.data, 10);
+        try {
+            yield db_1.UserModel.create({
+                username: usernameResult.data,
+                password: hashedPassword
+            });
+            res.status(200).json({
+                message: "sign up successful"
+            });
+        }
+        catch (error) {
+            res.status(403).json({
+                message: "duplicate entry or error",
+                error: error
+            });
+        }
     }
-    catch (error) {
+    else {
         res.status(403).json({
-            message: "duplicate entry or error",
-            error: error
+            usernameError: usernameResult.error,
+            passwordError: passwordResult.error
         });
     }
 }));
 app.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const username = req.body.username;
-    const password = req.body.password;
-    try {
-        const userExist = yield db_1.UserModel.findOne({
-            username: username,
-            password: password
-        });
-        if (userExist) {
-            const token = jsonwebtoken_1.default.sign({ username }, JWT_SECRET);
-            res.status(200).json({
-                token: token
+    const usernameResult = zodValidation_1.usernameSchema.safeParse(req.body.username);
+    const passwordResult = zodValidation_1.passwordSchema.safeParse(req.body.password);
+    if (usernameResult.success && passwordResult.success) {
+        try {
+            const userExist = yield db_1.UserModel.findOne({
+                username: usernameResult.data,
             });
+            if (userExist === null || userExist === void 0 ? void 0 : userExist.password) {
+                let hashedPassword = userExist.password;
+                const comparePassword = yield bcrypt_1.default.compare(passwordResult.data, hashedPassword);
+                if (comparePassword) {
+                    const token = jsonwebtoken_1.default.sign(usernameResult.data, JWT_SECRET);
+                    res.status(200).json({
+                        token: token
+                    });
+                }
+                else {
+                    res.status(403).json({
+                        message: "incorrect credentials"
+                    });
+                }
+            }
+            else {
+                res.status(403).json({
+                    message: "User Not found credentials"
+                });
+            }
         }
-        else {
+        catch (error) {
             res.status(403).json({
-                message: "incorrect credentials"
+                error
             });
         }
     }
-    catch (error) {
+    else {
         res.status(403).json({
-            error
+            usernameError: usernameResult.error,
+            passwordError: passwordResult.error
         });
     }
 }));
