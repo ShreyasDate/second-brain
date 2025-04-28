@@ -3,10 +3,11 @@ import { UserModel } from "./db";
 import  jwt  from "jsonwebtoken";
 import { usernameSchema, passwordSchema } from "./zodValidation";
 import bcrypt from "bcrypt";
+import { JWT_SECRET } from "./config";
 
 
 
-const JWT_SECRET = "ahdjfauregfgafrgayg"
+
 const app = express();
 
 app.use(express.json())

@@ -1,7 +1,8 @@
 import mongoose, {Schema, model} from 'mongoose';
+import { MONGO_URL } from './config';
 
 try {
-    mongoose.connect("mongodb+srv://admin:NNHIalSve0gIDfFK@cluster0.08oir.mongodb.net/second-brain");
+    mongoose.connect(MONGO_URL);
     console.log("\n connected to DB");
     
 } catch (error) {
