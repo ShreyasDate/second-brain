@@ -17,7 +17,8 @@ const db_1 = require("./db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const zodValidation_1 = require("./zodValidation");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const JWT_SECRET = "ahdjfauregfgafrgayg";
+const config_1 = require("./config");
+const middleware_1 = require("./middleware");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60,7 +61,7 @@ app.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 let hashedPassword = userExist.password;
                 const comparePassword = yield bcrypt_1.default.compare(passwordResult.data, hashedPassword);
                 if (comparePassword) {
-                    const token = jsonwebtoken_1.default.sign(usernameResult.data, JWT_SECRET);
+                    const token = jsonwebtoken_1.default.sign({ id: userExist._id }, config_1.JWT_SECRET);
                     res.status(200).json({
                         token: token
                     });
@@ -89,5 +90,29 @@ app.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             passwordError: passwordResult.error
         });
     }
+}));
+app.post("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const title = req.body.title;
+    const link = req.body.link;
+    yield db_1.ContentModel.create({
+        title: title,
+        link: link,
+        // @ts-ignore
+        userId: req.userId,
+        tags: []
+    });
+    res.json({
+        message: "added Content"
+    });
+}));
+app.get("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore
+    const userId = req.userId;
+    const content = yield db_1.ContentModel.find({
+        userId: userId
+    }).populate("userId", "username");
+    res.json({
+        content
+    });
 }));
 app.listen(3000);

@@ -1,9 +1,10 @@
 import express from "express";
-import { UserModel } from "./db";
+import { ContentModel, UserModel } from "./db";
 import  jwt  from "jsonwebtoken";
 import { usernameSchema, passwordSchema } from "./zodValidation";
 import bcrypt from "bcrypt";
 import { JWT_SECRET } from "./config";
+import { userMiddleware } from "./middleware";
 
 
 
@@ -66,7 +67,7 @@ app.post("/signin",async (req,res)=>{
                 let hashedPassword = userExist.password;
                 const comparePassword = await bcrypt.compare(passwordResult.data ,hashedPassword );
                 if(comparePassword){
-                    const token = jwt.sign(usernameResult.data,JWT_SECRET)
+                    const token = jwt.sign({id: userExist._id},JWT_SECRET)
                     res.status(200).json({
                         token : token
                     })
@@ -96,6 +97,51 @@ app.post("/signin",async (req,res)=>{
         })
     }
     
+})
+
+app.post("/content",userMiddleware, async (req,res)=>{
+
+    const title = req.body.title;
+    const link = req.body.link;
+
+    try{
+        await ContentModel.create({
+            title : title,
+            link : link,
+            // @ts-ignore
+            userId : req.userId,
+            tags : []
+        })
+
+        res.json({
+            message : "added Content"
+        })
+    }catch(error){
+        res.status(403).json({
+            message :"Cant add content",
+            error : error
+        })
+    }
+})
+
+app.get("/content",userMiddleware,async (req,res)=>{
+    try{
+        // @ts-ignore
+        const userId = req.userId;
+
+        const content = await ContentModel.find({
+            userId : userId
+        }).populate("userId","username")
+
+        res.json({
+            content
+        })
+    }catch(error){
+        res.status(403).json({
+            message : "Cant get content",
+            error : error
+        })
+    }        
 })
 
 app.listen(3000)

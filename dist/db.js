@@ -33,10 +33,11 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.ContentModel = exports.UserModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const config_1 = require("./config");
 try {
-    mongoose_1.default.connect("mongodb+srv://admin:NNHIalSve0gIDfFK@cluster0.08oir.mongodb.net/second-brain");
+    mongoose_1.default.connect(config_1.MONGO_URL);
     console.log("\n connected to DB");
 }
 catch (error) {
@@ -46,4 +47,11 @@ const UserSchema = new mongoose_1.Schema({
     username: { type: String, unique: true },
     password: String
 });
-exports.UserModel = (0, mongoose_1.model)("user", UserSchema);
+exports.UserModel = (0, mongoose_1.model)("User", UserSchema);
+const ContentSchema = new mongoose_1.Schema({
+    title: String,
+    link: String,
+    tags: [{ type: mongoose_1.default.Types.ObjectId, ref: "Tag" }],
+    userId: { type: mongoose_1.default.Types.ObjectId, ref: "User", required: true }
+});
+exports.ContentModel = (0, mongoose_1.model)("Content", ContentSchema);
