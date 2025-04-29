@@ -144,4 +144,22 @@ app.get("/content",userMiddleware,async (req,res)=>{
     }        
 })
 
+app.delete("/content",userMiddleware,async (req,res)=>{
+    try{        
+        const contentId = req.body.contentId;
+        // @ts-ignore
+        const userId = req.userId;
+
+        await ContentModel.deleteMany({
+            contentId : contentId,
+            userId : userId
+        })
+    }catch(error){
+        res.status(403).json({
+            message : "cant delete content",
+            error : error
+        })
+    }
+})
+
 app.listen(3000)
