@@ -209,5 +209,29 @@ app.post("/share",userMiddleware,async (req,res)=>{
         })
     }
 })
-
+app.get("/:shareLink", async (req ,res)=>{
+    const hash = req.params.shareLink;
+    try {
+        const link = await ShareModel.findOne({
+            hash : hash
+        })
+        if (!link) {
+            res.status(403).json({
+                message : "incorrect link"
+            })
+            return;
+        }
+        const content = await ContentModel.find({
+            userId : link.userId
+        }).populate("userId","username")
+    
+        res.status(200).json({
+            content
+        })
+    } catch (error) {
+        res.status(403).json({
+            error
+        })
+    }
+})
 app.listen(3000)

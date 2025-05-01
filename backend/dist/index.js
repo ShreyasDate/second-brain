@@ -192,4 +192,22 @@ app.post("/share", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, 
         });
     }
 }));
+app.get("/:shareLink", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const hash = req.params.shareLink;
+    const link = yield db_1.ShareModel.findOne({
+        hash: hash
+    });
+    if (!link) {
+        res.status(403).json({
+            message: "incorrect link"
+        });
+        return;
+    }
+    const content = yield db_1.ContentModel.find({
+        userId: link.userId
+    }).populate("userId", "username");
+    res.status(200).json({
+        content
+    });
+}));
 app.listen(3000);
