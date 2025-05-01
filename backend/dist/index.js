@@ -94,25 +94,60 @@ app.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 app.post("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const title = req.body.title;
     const link = req.body.link;
-    yield db_1.ContentModel.create({
-        title: title,
-        link: link,
-        // @ts-ignore
-        userId: req.userId,
-        tags: []
-    });
-    res.json({
-        message: "added Content"
-    });
+    try {
+        yield db_1.ContentModel.create({
+            title: title,
+            link: link,
+            // @ts-ignore
+            userId: req.userId,
+            tags: []
+        });
+        res.json({
+            message: "added Content"
+        });
+    }
+    catch (error) {
+        res.status(403).json({
+            message: "Cant add content",
+            error: error
+        });
+    }
 }));
 app.get("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // @ts-ignore
-    const userId = req.userId;
-    const content = yield db_1.ContentModel.find({
-        userId: userId
-    }).populate("userId", "username");
-    res.json({
-        content
-    });
+    try {
+        // @ts-ignore
+        const userId = req.userId;
+        const content = yield db_1.ContentModel.find({
+            userId: userId
+        }).populate("userId", "username");
+        res.json({
+            content
+        });
+    }
+    catch (error) {
+        res.status(403).json({
+            message: "Cant get content",
+            error: error
+        });
+    }
+}));
+app.delete("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contentId = req.body.contentId;
+        // @ts-ignore
+        const userId = req.userId;
+        yield db_1.ContentModel.deleteMany({
+            _id: contentId,
+        });
+        res.status(200).json({
+            message: "deleted content successfully"
+        });
+    }
+    catch (error) {
+        res.status(403).json({
+            message: "cant delete content",
+            error: error
+        });
+    }
 }));
 app.listen(3000);

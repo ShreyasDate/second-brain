@@ -150,9 +150,15 @@ app.delete("/content",userMiddleware,async (req,res)=>{
         // @ts-ignore
         const userId = req.userId;
 
-        await ContentModel.deleteMany({
-            contentId : contentId,
-            userId : userId
+        await ContentModel.deleteOne({
+            _id : contentId,
+            // @ts-ignore
+            userId : req.userId
+            
+        })
+
+        res.status(200).json({
+            message : "deleted content successfully"
         })
     }catch(error){
         res.status(403).json({
