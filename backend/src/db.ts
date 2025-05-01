@@ -1,5 +1,6 @@
 import mongoose, {Schema, model} from 'mongoose';
 import { MONGO_URL } from './config';
+import { string } from 'zod';
 
 try {
     mongoose.connect(MONGO_URL);
@@ -23,4 +24,11 @@ const ContentSchema = new Schema({
     userId : {type : mongoose.Types.ObjectId, ref : "User" , required : true}
 })
 
-export const ContentModel = model("Content", ContentSchema)
+export const ContentModel = model("Content", ContentSchema);
+
+const ShareSchema = new Schema({
+    hash : {type: String},
+    userId : {type: mongoose.Types.ObjectId, ref : "User", unique : true}
+})
+
+export const ShareModel = model("Share",ShareSchema);   

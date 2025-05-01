@@ -19,6 +19,7 @@ const zodValidation_1 = require("./zodValidation");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
+const utils_1 = require("./utils");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -136,8 +137,10 @@ app.delete("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void
         const contentId = req.body.contentId;
         // @ts-ignore
         const userId = req.userId;
-        yield db_1.ContentModel.deleteMany({
+        yield db_1.ContentModel.deleteOne({
             _id: contentId,
+            // @ts-ignore
+            userId: req.userId
         });
         res.status(200).json({
             message: "deleted content successfully"
@@ -147,6 +150,45 @@ app.delete("/content", middleware_1.userMiddleware, (req, res) => __awaiter(void
         res.status(403).json({
             message: "cant delete content",
             error: error
+        });
+    }
+}));
+app.post("/share", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const share = req.body.share;
+    try {
+        if (share) {
+            const userExists = yield db_1.ShareModel.findOne({
+                userId: req.body.userId
+            });
+            if (userExists) {
+                res.status(200).json({
+                    hash: userExists.hash
+                });
+                return;
+            }
+            const hash = (0, utils_1.generateRandomString)(10);
+            yield db_1.ShareModel.create({
+                hash: hash,
+                // @ts-ignore
+                userId: req.userId
+            });
+            res.status(200).json({
+                hash: hash
+            });
+        }
+        else {
+            yield db_1.ShareModel.deleteOne({
+                // @ts-ignore
+                userId: req.userId
+            });
+            res.status(200).json({
+                message: "Link Deleted from DB"
+            });
+        }
+    }
+    catch (error) {
+        res.status(403).json({
+            error
         });
     }
 }));
