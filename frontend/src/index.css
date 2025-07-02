@@ -1,1 +1,20 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+@theme {
+    /* bg for secondary button */
+    --color-purple-100: #dde6fa;
+    /* bg for primary button */
+    --color-purple-500: #4644d9;
+    /* text color foe secondary button */
+    --color-purple-300: #4f5291;
+
+
+
+    /* main bg color  */
+    --color-gray-100: #f7f8fa;
+
+    --color-gray-500: #d7d6d6;
+    /* text color */
+    --color-gray-600: #5d5f5e;
+    
+  }
