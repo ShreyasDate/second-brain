@@ -3,26 +3,22 @@ import { ShareIcon } from "../assets/icons/ShareIcon";
 
 export function Card() {
     return (
-        <div className="flex border max-w-60 justify-between">
-            <div className="flex items-center gap-2">
-                <div className="text-gray-400">
+        <div className="bg-white p-8 border border-gray-200 rounded-md max-w-96  ">
+            <div className="flex justify-between">
+                <div className="flex">
                     <ShareIcon />
+                    Project Ideas
                 </div>
-
-                <div>
-                    Heyy There
-                </div>
+                <div className="flex">
+                    <div className="pr-2 text-gray-600">
+                        <ShareIcon />
+                    </div>
+                    <div className="pr-2 text-gray-600">
+                        <ShareIcon />
+                    </div>
                     
-
-            </div>
-
-            <div className="flex items-center gap-2 text-gray-400">
-                
-                < PlusIcon />
-                
-                
-                <ShareIcon />
-            </div>
+                </div>
+            </div>   
         </div>
     );
 }
