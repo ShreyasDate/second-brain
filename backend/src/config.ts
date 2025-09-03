@@ -1,2 +1,6 @@
-export const JWT_SECRET = "ahdjfauregfgafrgayg";
-export const MONGO_URL = "mongodb+srv://admin:NNHIalSve0gIDfFK@cluster0.08oir.mongodb.net/second-brain";
+import dotenv from "dotenv";
+dotenv.config();
+
+export const JWT_SECRET = process.env.JWT_SECRET as string;
+export const MONGO_URL = process.env.MONGO_URL as string;
+export const PORT = process.env.PORT as string;

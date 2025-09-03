@@ -1,6 +1,6 @@
 import mongoose, {Schema, model} from 'mongoose';
 import { MONGO_URL } from './config';
-import { string } from 'zod';
+
 
 try {
     mongoose.connect(MONGO_URL);

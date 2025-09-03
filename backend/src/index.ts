@@ -3,10 +3,11 @@ import { ContentModel, ShareModel, UserModel } from "./db";
 import  jwt  from "jsonwebtoken";
 import { usernameSchema, passwordSchema } from "./zodValidation";
 import bcrypt, { hash } from "bcrypt";
-import { JWT_SECRET } from "./config";
+import { JWT_SECRET, PORT } from "./config";
 import { userMiddleware } from "./middleware";
 import { generateRandomString } from "./utils";
-
+import dotenv from "dotenv";
+dotenv.config();
 
 
 
@@ -234,4 +235,4 @@ app.get("/:shareLink", async (req ,res)=>{
         })
     }
 })
-app.listen(3000)
+app.listen(PORT,()=>console.log(`Listening on port ${PORT}`));

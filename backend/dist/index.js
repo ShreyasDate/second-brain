@@ -20,6 +20,8 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const utils_1 = require("./utils");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -217,4 +219,4 @@ app.get("/:shareLink", (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
 }));
-app.listen(3000);
+app.listen(config_1.PORT, () => console.log(`Listening on port ${config_1.PORT}`));
