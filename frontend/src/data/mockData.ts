@@ -7,7 +7,7 @@ export const mockNotes: Note[] = [
     title: 'Thread about React best practices',
     content: 'Just discovered this amazing pattern for managing state in React applications. The key is to keep your components as pure as possible and lift state up when needed. Here\'s what I learned...\n\n🧵 Thread (1/5)\n\n1. Always start with local state\n2. Lift state up when multiple components need it\n3. Use context for deeply nested prop drilling\n4. Consider state management libraries for complex apps\n\nWhat are your favorite React patterns? 🤔',
     url: 'https://twitter.com/example/status/123',
-    author: '@reactdev',
+    
     date: 'Jan 15, 2025',
     createdAt: '2025-01-15T10:00:00Z',
     userNotes: 'Great insights on component architecture. Need to apply this to our current project.',
@@ -20,8 +20,8 @@ export const mockNotes: Note[] = [
     title: 'Advanced TypeScript Patterns You Should Know',
     content: 'In this video, we explore advanced TypeScript patterns including conditional types, mapped types, and template literal types. These patterns will help you write more type-safe code and catch errors at compile time.',
     url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=225&fit=crop',
-    author: 'TypeScript Pro',
+    
+   
     date: 'Jan 14, 2025',
     createdAt: '2025-01-14T10:00:00Z',
     userNotes: 'Excellent explanation of conditional types. Bookmarked the timestamp 12:30 for template literals.',

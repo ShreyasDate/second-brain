@@ -8,13 +8,14 @@ import { NoteModal } from "./NoteModal"
 import { AddContentModal } from "./AddContentModal"
 import { mockNotes } from "../data/mockData"
 import { toast } from "sonner"
-
+import { extractYouTubeId, extractTweetId } from '@/utils/extractId'
 interface DashboardProps {
   onLogout: () => void
   onShareBrain?: (shareId: string) => void
+  userName?: string
 }
 
-export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
+export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) {
   const [activeFilter, setActiveFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [notes, setNotes] = useState<Note[]>(mockNotes)
@@ -34,12 +35,12 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
           return note.type === activeFilter
       }
     })()
-    
-    const matchesSearch = searchQuery === '' || 
+
+    const matchesSearch = searchQuery === '' ||
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       note.userNotes?.toLowerCase().includes(searchQuery.toLowerCase())
-    
+
     return matchesFilter && matchesSearch
   })
 
@@ -68,14 +69,14 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
     // Generate a shareable link (mock implementation)
     const shareId = Math.random().toString(36).substring(7)
     const shareUrl = `${window.location.origin}?shared=${shareId}`
-    
+
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast.success('Share link copied to clipboard!')
     }).catch(() => {
       toast.error('Failed to copy link')
     })
-    
+
     if (onShareBrain) {
       onShareBrain(shareId)
     }
@@ -89,17 +90,17 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
   const handleToggleBookmark = (noteId: string) => {
     setNotes(prevNotes =>
       prevNotes.map(note =>
-        note.id === noteId 
+        note.id === noteId
           ? { ...note, isBookmarked: !note.isBookmarked }
           : note
       )
     )
-    
+
     const note = notes.find(n => n.id === noteId)
     if (note) {
       toast.success(
-        note.isBookmarked 
-          ? 'Removed from bookmarks' 
+        note.isBookmarked
+          ? 'Removed from bookmarks'
           : 'Added to bookmarks'
       )
     }
@@ -138,10 +139,10 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
       url: newNote.url || '',
       userNotes: newNote.userNotes,
       createdAt: new Date().toISOString(),
-      date: new Date().toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
       }),
       isBookmarked: false,
       // Add video ID for YouTube or tweet ID for Twitter if applicable
@@ -157,26 +158,18 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
     toast.success('Content added successfully!')
   }
 
-  // Helper functions to extract IDs from URLs
-  const extractYouTubeId = (url: string): string | undefined => {
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
-    return match ? match[1] : undefined
-  }
-
-  const extractTweetId = (url: string): string | undefined => {
-    const match = url.match(/twitter\.com\/\w+\/status\/(\d+)/)
-    return match ? match[1] : undefined
-  }
+  
 
   return (
     <SidebarProvider className="w-full">
       <div className="flex h-screen bg-background w-full">
-        <AppSidebar 
-          activeFilter={activeFilter} 
+        <AppSidebar
+          activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
           onLogout={onLogout}
+          userName={userName}
         />
-        
+
         <SidebarInset className="flex flex-col flex-1 overflow-hidden w-full">
           <AppNavbar
             searchQuery={searchQuery}
@@ -184,7 +177,7 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
             onAddContent={handleAddContent}
             onShareBrain={handleShareBrain}
           />
-          
+
           <main className="flex-1 overflow-auto p-4 sm:p-6 w-full">
             <div className="w-full max-w-none min-w-0">
               {/* Header */}
@@ -202,9 +195,9 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
               {filteredNotes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 w-full">
                   {filteredNotes.map((note) => (
-                    <NoteCard 
-                      key={note.id} 
-                      note={note} 
+                    <NoteCard
+                      key={note.id}
+                      note={note}
                       onDelete={handleDeleteNote}
                       onClick={handleNoteClick}
                       onToggleBookmark={handleToggleBookmark}
@@ -223,7 +216,7 @@ export function Dashboard({ onLogout, onShareBrain }: DashboardProps) {
                       <div className="w-full">
                         <p>No {activeFilter === 'all' ? '' : activeFilter === 'bookmarks' ? 'bookmarked' : activeFilter} notes yet</p>
                         <p className="text-sm mt-1">
-                          {activeFilter === 'bookmarks' 
+                          {activeFilter === 'bookmarks'
                             ? 'Use the bookmark button in the three-dots menu to save your favorite notes'
                             : 'Start building your second brain by adding some content'
                           }

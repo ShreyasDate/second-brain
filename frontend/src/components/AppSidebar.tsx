@@ -11,16 +11,17 @@ import {
   SidebarFooter,
 } from "./ui/sidebar"
 
-import { Twitter, Youtube, FileText, Bookmark, Grid3X3, LogOut, Brain } from "lucide-react"
+import { Twitter, Youtube, FileText, Bookmark, Grid3X3, LogOut, Brain, User } from "lucide-react"
 import { Button } from "./ui/button"
 
 interface AppSidebarProps {
   activeFilter: string
   onFilterChange: (filter: string) => void
   onLogout?: () => void
+  userName?: string
 }
 
-export function AppSidebar({ activeFilter, onFilterChange, onLogout }: AppSidebarProps) {
+export function AppSidebar({ activeFilter, onFilterChange, onLogout, userName }: AppSidebarProps) {
   const filters = [
     {
       id: 'all',
@@ -88,7 +89,16 @@ export function AppSidebar({ activeFilter, onFilterChange, onLogout }: AppSideba
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t p-4 space-y-3">
+        <div className="flex items-center gap-2 px-2 py-1 rounded-md">
+          <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+            <User className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-medium truncate">{userName}</span>
+            <span className="text-xs text-muted-foreground">Personal Brain</span>
+          </div>
+        </div>
         <Button variant="ghost" className="w-full justify-start gap-2" size="sm" onClick={onLogout}>
           <LogOut className="h-4 w-4" />
           Logout

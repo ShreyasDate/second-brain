@@ -53,7 +53,7 @@ export function SignUp({ onSignUp, onSwitchToSignIn, onBackToLanding }: SignUpPr
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 type="text"
