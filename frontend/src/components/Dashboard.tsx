@@ -8,7 +8,7 @@ import { NoteModal } from "./NoteModal"
 import { AddContentModal } from "./AddContentModal"
 import { mockNotes } from "../data/mockData"
 import { toast } from "sonner"
-import { extractYouTubeId, extractTweetId } from '@/utils/extractId'
+
 interface DashboardProps {
   onLogout: () => void
   onShareBrain?: (shareId: string) => void
@@ -138,20 +138,14 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
       content: newNote.content,
       url: newNote.url || '',
       userNotes: newNote.userNotes,
-      createdAt: new Date().toISOString(),
+     
       date: new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
       }),
       isBookmarked: false,
-      // Add video ID for YouTube or tweet ID for Twitter if applicable
-      ...(newNote.type === 'youtube' && newNote.url && {
-        youtubeId: extractYouTubeId(newNote.url)
-      }),
-      ...(newNote.type === 'twitter' && newNote.url && {
-        tweetId: extractTweetId(newNote.url)
-      })
+      
     }
 
     setNotes(prevNotes => [note, ...prevNotes])

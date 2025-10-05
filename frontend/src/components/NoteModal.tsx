@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
-import { Twitter, Youtube, FileText, Calendar, ExternalLinkIcon, Edit3 } from "lucide-react"
+import { Twitter, Youtube, FileText, Calendar, ExternalLinkIcon, Edit3, MessageCircle, Repeat2, Heart, Share } from "lucide-react"
 import { ImageWithFallback } from './figma/ImageWithFallback'
+import { extractYouTubeId, extractTweetId } from "../utils/extractId"
 import type { Note } from './NoteCard'
-import { useState } from 'react'
+import { Tweet } from 'react-tweet'
 
 interface NoteModalProps {
   note: Note | null
@@ -71,52 +73,40 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
   }
 
   const renderFullEmbeddedContent = () => {
-    if (note.type === 'youtube' && note.youtubeId) {
-      return (
-        <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-6">
-          <iframe
-            src={`https://www.youtube.com/embed/${note.youtubeId}`}
-            title={note.title}
-            className="w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      )
+    if (note.type === 'youtube' && note.url) {
+      const youtubeId = extractYouTubeId(note.url)
+      if (youtubeId) {
+        return (
+          <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-6">
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title={note.title}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )
+      }
     }
 
-    if (note.type === 'twitter' && note.tweetId) {
-      return (
-        <div className="bg-card border rounded-lg p-6 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-              <Twitter className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <div className="font-medium">{note.author}</div>
-              <div className="text-sm text-muted-foreground">{note.date}</div>
-            </div>
+    if (note.type === 'twitter' && note.url) {
+      const tweetId = extractTweetId(note.url)
+      if (tweetId) {
+        return (
+          <div className="rounded-lg border bg-card text-card-foreground p-2 mb-6 max-w-full">
+
+            <p className="leading-relaxed whitespace-pre-wrap">{<Tweet id={tweetId} />}</p>
+
+
           </div>
-          <div className="leading-relaxed whitespace-pre-wrap">
-            {note.content}
-          </div>
-        </div>
-      )
+        )
+      }
     }
 
     // Fallback for other content types
-    if (note.thumbnail) {
-      return (
-        <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-6">
-          <ImageWithFallback
-            src={note.thumbnail}
-            alt={note.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )
-    }
+    
 
     return null
   }
@@ -152,9 +142,9 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
             {note.title}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm mt-2">
-            {note.type === 'twitter' ? 'Twitter post' : 
-             note.type === 'youtube' ? 'YouTube video' : 
-             'Text note'} saved on {note.date}
+            {note.type === 'twitter' ? 'Twitter post' :
+              note.type === 'youtube' ? 'YouTube video' :
+                'Text note'} saved on {note.date}
           </DialogDescription>
         </DialogHeader>
 
@@ -168,11 +158,7 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
               <p className="leading-relaxed whitespace-pre-wrap">
                 {note.content}
               </p>
-              {note.author && (
-                <p className="text-sm text-muted-foreground mt-4">
-                  by {note.author}
-                </p>
-              )}
+              
             </div>
           )}
 
@@ -225,7 +211,7 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
               )}
             </div>
           )}
-          
+
           {/* Public view notes section */}
           {isPublicView && note.userNotes && (
             <div className="border-t pt-6">

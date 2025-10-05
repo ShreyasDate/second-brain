@@ -118,3 +118,52 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ===== Theming for scrollbars ===== */
+:root {
+  /* light theme defaults */
+  --sb-thumb: rgba(0, 0, 0, 0.28);
+  --sb-thumb-hover: rgba(0, 0, 0, 0.44);
+  --sb-track: transparent; /* or use rgba(0,0,0,.06) if you want a faint track */
+}
+
+/* shadcn/ui sets data-theme on <html>. Adjust to your setup if different */
+[data-theme="dark"] {
+  --sb-thumb: rgba(255, 255, 255, 0.28);
+  --sb-thumb-hover: rgba(255, 255, 255, 0.44);
+  --sb-track: transparent; /* or rgba(255,255,255,.06) */
+}
+
+/* Chrome/Edge/Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sb-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+/* Optional: avoid layout shift when scrollbar appears */
+.scrollbar-stable {
+  scrollbar-gutter: stable both-edges;
+}
+
+
+.scrollbar-hide-until-hover::-webkit-scrollbar-thumb { background: transparent; }
+.scrollbar-hide-until-hover:hover::-webkit-scrollbar-thumb { background: var(--sb-thumb); }

@@ -3,6 +3,8 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Twitter, Youtube, FileText, Calendar, MoreHorizontal, Trash2, ExternalLinkIcon, Bookmark, BookmarkCheck } from "lucide-react"
 
+import { extractYouTubeId, extractTweetId } from "../utils/extractId"
+import { Tweet } from 'react-tweet'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,20 +12,19 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 
+
+
 export interface Note {
-  id: string
-  type: 'twitter' | 'youtube' | 'text'
-  title: string
-  content: string
-  url: string
-  thumbnail?: string
-  author?: string
-  date: string
-  createdAt: string
-  userNotes?: string
-  tweetId?: string
-  youtubeId?: string
-  isBookmarked?: boolean
+  id: string;
+  userId?: string;       // present when fetched from backend
+  type: "text" | "youtube" | "twitter";
+  title: string;
+  content: string;
+  url?: string;
+  userNotes?: string;
+  isBookmarked?: boolean;
+
+  date?: string;
 }
 
 interface NoteCardProps {
@@ -99,57 +100,60 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
   }
 
   const renderEmbeddedContent = () => {
-    if (note.type === 'youtube' && note.youtubeId) {
-      return (
-        <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-          <iframe
-            src={`https://www.youtube.com/embed/${note.youtubeId}`}
-            title={note.title}
-            className="w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      )
-    }
-
-    if (note.type === 'twitter' && note.tweetId) {
-      return (
-        <div className="aspect-video rounded-lg overflow-hidden bg-muted p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-4 h-full overflow-y-auto">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <Twitter className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <div className="font-medium text-sm">{note.author}</div>
-                <div className="text-xs text-muted-foreground">{note.date}</div>
-              </div>
-            </div>
-            <div className="text-sm leading-relaxed">
-              {note.content}
-            </div>
+    if (note.type === 'youtube' && note.url) {
+      const youtubeId = extractYouTubeId(note.url)
+      if (youtubeId) {
+        return (
+          <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title={note.title}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           </div>
-        </div>
-      )
+        )
+      }
     }
 
-    
+    if (note.type === 'twitter' && note.url) {
+      const tweetId = extractTweetId(note.url)
+      if (tweetId) {
+        return (
+          <div
+            className="w-full h-64 overflow-y-auto pr-2 scrollbar-stable
+    [&_[data-theme]]:!bg-transparent
+    [&_[data-theme]]:!border-0
+    [&_[data-theme]]:!shadow-none
+    [&_article]:!bg-card
+    [&_article]:!border-border
+    [&_article]:!rounded-lg
+    [&_article]:!shadow-sm scrollbar-hide-until-hover"
+          >
+            <Tweet id={tweetId} />
+          </div>
+
+        )
+      }
+    }
+
+
 
     return null
   }
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer relative" onClick={handleCardClick}>
+    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer relative flex flex-col h-full" onClick={handleCardClick}>
       {/* Bookmark indicator */}
       {note.isBookmarked && (
         <div className="absolute top-2 right-2 z-10">
           <BookmarkCheck className="h-4 w-4 text-yellow-500 fill-current" />
         </div>
       )}
-      
-      <CardHeader className="pb-3">
+
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className={`${getTypeColor()} text-white border-0`}>
@@ -208,7 +212,7 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 overflow-hidden">
         {/* Embedded Content */}
         {renderEmbeddedContent()}
 
@@ -232,15 +236,13 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
         )}
       </CardContent>
 
-      <CardFooter className="pt-3 border-t bg-muted/20">
+      <CardFooter className="pt-3 border-t bg-muted/20 flex-shrink-0 mt-auto">
         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             <span>{note.date}</span>
           </div>
-          {note.author && (
-            <span>by {note.author}</span>
-          )}
+
         </div>
       </CardFooter>
     </Card>
