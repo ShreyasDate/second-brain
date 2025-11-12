@@ -1,6 +1,6 @@
-import type { Note } from '../components/NoteCard'
 
-export const mockNotes: Note[] = [
+
+export const mockNotes = [
   {
     id: '1',
     type: 'twitter',

@@ -20,14 +20,14 @@ const UserSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,       // ensures uniqueness
-        lowercase: true,    // normalize for uniqueness
+        unique: true,       
+        lowercase: true,    
         trim: true,
-        index: true,        // creates an index for faster lookups
+        index: true,        
     },
     password: {
     type: String,
-    required: true,     // this should be the hashed password
+    required: true,     
   },
 })
 

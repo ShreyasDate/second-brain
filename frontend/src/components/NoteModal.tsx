@@ -105,7 +105,7 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
       }
     }
 
-    // Fallback for other content types
+  
     
 
     return null

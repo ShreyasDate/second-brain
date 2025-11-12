@@ -29,21 +29,24 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false)
 
 
+  const fetchNotes = async () => {
+    try {
+      const token = localStorage.getItem("sb_token"); // token stored at login
+      const res = await axios.get(`${BASE_URL}/content`, {
+        headers: { Authorization: token },
+      })
+      setNotes(res.data.content);
+      console.log(res.data)
+    } catch (err) {
+      console.error("Failed to fetch notes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const token = localStorage.getItem("sb_token"); // token stored at login
-        const res = await axios.get(`${BASE_URL}/content`, {
-          headers: { Authorization: token },
-        })
-        setNotes(res.data.content);
-        console.log(res.data)
-      } catch (err) {
-        console.error("Failed to fetch notes:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+
     fetchNotes();
   }, []);
 
@@ -114,7 +117,8 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
       }
     );
     console.log(res.data)
-    toast.success('Note deleted successfully')
+    toast.success('Note deleted successfully');
+    fetchNotes();
   }
 
   const handleToggleBookmark = async (Id: string, Bookmarked: boolean) => {
@@ -124,7 +128,8 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
         headers: { Authorization: token }
       })
       console.log(res.data)
-      toast.success('Note bookmarked successfully')
+      toast.success('Note bookmarked successfully');
+      fetchNotes();
     } catch (error) {
       console.log(error)
     }
@@ -142,7 +147,8 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
         headers: { Authorization: token }
       })
       console.log(res.data)
-      toast.success('Notes updated successfully')
+      toast.success('Notes updated successfully');
+      fetchNotes();
     } catch (error) {
       console.log(error)
     }
@@ -170,7 +176,8 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
         { headers: { Authorization: token } }
       )
       console.log(res.data)
-      toast.success('Content added successfully!')
+      toast.success('Content added successfully!');
+      fetchNotes();
     } catch (err) {
       console.log(err)
 
