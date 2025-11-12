@@ -22,7 +22,7 @@ export interface Note {
   content: string;
   link?: string;
   userNotes?: string;
-  isBookmarked?: boolean;
+  isBookmarked: boolean;
 
   date?: string;
 }
@@ -32,7 +32,7 @@ interface NoteCardProps {
   onEdit?: (note: Note) => void
   onDelete?: (noteId: string) => void
   onClick?: (note: Note) => void
-  onToggleBookmark?: (noteId: string) => void
+  onToggleBookmark?: (noteId: string, isBookmarked : boolean) => void
   isPublicView?: boolean
 }
 
@@ -98,7 +98,7 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
   const handleToggleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation()
     
-    onToggleBookmark?.(note._id)
+    onToggleBookmark?.(note._id, note.isBookmarked)
   }
 
   const renderEmbeddedContent = () => {

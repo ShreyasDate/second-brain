@@ -117,8 +117,16 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     toast.success('Note deleted successfully')
   }
 
-  const handleToggleBookmark = (Id: string) => {
-    
+  const handleToggleBookmark = (Id: string, Bookmarked: boolean) => {
+    try {
+      const token = localStorage.getItem("sb_token");
+      axios.patch(`${BASE_URL}/content/${Id}`, { isBookmarked: !Bookmarked }, {
+        headers: { Authorization: token }
+      })
+      toast.success('Note bookmarked successfully')
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handleNoteClick = (note: Note) => {
