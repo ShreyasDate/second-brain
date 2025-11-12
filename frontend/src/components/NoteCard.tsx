@@ -15,7 +15,7 @@ import {
 
 
 export interface Note {
-  id: string;
+  _id: string;
   userId?: string;       // present when fetched from backend
   type: "text" | "youtube" | "twitter";
   title: string;
@@ -86,7 +86,8 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onDelete?.(note.id)
+    
+    onDelete?.(note._id)
   }
 
   const handleViewOriginal = (e: React.MouseEvent) => {
@@ -96,7 +97,8 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
 
   const handleToggleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onToggleBookmark?.(note.id)
+    
+    onToggleBookmark?.(note._id)
   }
 
   const renderEmbeddedContent = () => {

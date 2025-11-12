@@ -22,6 +22,7 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
   const [activeFilter, setActiveFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
+
   const [loading, setLoading] = useState(true);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -105,12 +106,18 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     }
   }
 
-  const handleDeleteNote = (noteId: string) => {
-   
+  const handleDeleteNote = async (id : string) => {
+    
+    const res = await axios.delete(`${BASE_URL}/content/${id}`,
+      {
+        headers: { Authorization: localStorage.getItem("sb_token") }
+      }
+    );
+    console.log(res.data)
     toast.success('Note deleted successfully')
   }
 
-  const handleToggleBookmark = (noteId: string) => {
+  const handleToggleBookmark = (Id: string) => {
     
   }
 
@@ -197,7 +204,7 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 w-full">
                   {filteredNotes.map((note) => (
                     <NoteCard
-                      key={note.id}
+                      
                       note={note}
                       onDelete={handleDeleteNote}
                       onClick={handleNoteClick}
