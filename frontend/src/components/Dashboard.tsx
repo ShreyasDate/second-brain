@@ -106,8 +106,8 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     }
   }
 
-  const handleDeleteNote = async (id : string) => {
-    
+  const handleDeleteNote = async (id: string) => {
+
     const res = await axios.delete(`${BASE_URL}/content/${id}`,
       {
         headers: { Authorization: localStorage.getItem("sb_token") }
@@ -117,12 +117,13 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     toast.success('Note deleted successfully')
   }
 
-  const handleToggleBookmark = (Id: string, Bookmarked: boolean) => {
+  const handleToggleBookmark = async (Id: string, Bookmarked: boolean) => {
     try {
       const token = localStorage.getItem("sb_token");
-      axios.patch(`${BASE_URL}/content/${Id}`, { isBookmarked: !Bookmarked }, {
+      const res = await axios.patch(`${BASE_URL}/content/${Id}`, { isBookmarked: !Bookmarked }, {
         headers: { Authorization: token }
       })
+      console.log(res.data)
       toast.success('Note bookmarked successfully')
     } catch (error) {
       console.log(error)
@@ -134,9 +135,18 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     setIsModalOpen(true)
   }
 
-  const handleUpdateUserNotes = (userNotes: string) => {
-    
-    toast.success('Notes updated successfully')
+  const handleUpdateUserNotes = async (id: string, userNotes: string) => {
+    try {
+      const token = localStorage.getItem("sb_token");
+      const res = await axios.patch(`${BASE_URL}/content/${id}`, { userNotes: userNotes }, {
+        headers: { Authorization: token }
+      })
+      console.log(res.data)
+      toast.success('Notes updated successfully')
+    } catch (error) {
+      console.log(error)
+    }
+
   }
 
   const handleAddNewContent = async (newNote: {
@@ -155,15 +165,15 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
           type: newNote.type,
           link: newNote.url,
           userNotes: newNote.userNotes,
-          
+
         },
-        {headers: { Authorization: token }}
+        { headers: { Authorization: token } }
       )
       console.log(res.data)
       toast.success('Content added successfully!')
     } catch (err) {
       console.log(err)
-      
+
     }
 
   }
@@ -212,7 +222,7 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 w-full">
                   {filteredNotes.map((note) => (
                     <NoteCard
-                      
+
                       note={note}
                       onDelete={handleDeleteNote}
                       onClick={handleNoteClick}

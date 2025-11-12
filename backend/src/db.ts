@@ -34,11 +34,12 @@ const UserSchema = new Schema({
 export const UserModel = model("User", UserSchema);
 
 const ContentSchema = new Schema({
-    title: { type: String, required: true },
+  title: { type: String, required: true },
   link: { type: String, default: '' },       
   content: { type: String},     
   type: { type: String, enum: ['text','youtube','twitter'], default: 'text' },
-  date: { type: String },                    
+  date: { type: String },  
+  userNotes : { type: String , default : '' },                  
   
   userId: { type: mongoose.Types.ObjectId, ref: "User", required: true, index: true },
   isBookmarked: { type: Boolean, default: false }

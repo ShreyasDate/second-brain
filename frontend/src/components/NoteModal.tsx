@@ -63,7 +63,7 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
   }
 
   const handleSaveNotes = () => {
-    onUpdateUserNotes?.(note.id, userNotes)
+    onUpdateUserNotes?.(note._id, userNotes)
     setIsEditingNotes(false)
   }
 
