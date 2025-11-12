@@ -20,7 +20,7 @@ export interface Note {
   type: "text" | "youtube" | "twitter";
   title: string;
   content: string;
-  url?: string;
+  link?: string;
   userNotes?: string;
   isBookmarked?: boolean;
 
@@ -91,7 +91,7 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
 
   const handleViewOriginal = (e: React.MouseEvent) => {
     e.stopPropagation()
-    window.open(note.url, '_blank')
+    window.open(note.link, '_blank')
   }
 
   const handleToggleBookmark = (e: React.MouseEvent) => {
@@ -100,8 +100,8 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
   }
 
   const renderEmbeddedContent = () => {
-    if (note.type === 'youtube' && note.url) {
-      const youtubeId = extractYouTubeId(note.url)
+    if (note.type === 'youtube' && note.link) {
+      const youtubeId = extractYouTubeId(note.link)
       if (youtubeId) {
         return (
           <div className="aspect-video rounded-lg overflow-hidden bg-muted">
@@ -118,8 +118,8 @@ export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, is
       }
     }
 
-    if (note.type === 'twitter' && note.url) {
-      const tweetId = extractTweetId(note.url)
+    if (note.type === 'twitter' && note.link) {
+      const tweetId = extractTweetId(note.link)
       if (tweetId) {
         return (
           <div

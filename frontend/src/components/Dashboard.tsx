@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Loader2 } from "lucide-react";
+import axios from 'axios'
 import { SidebarProvider, SidebarInset } from "./ui/sidebar"
 import { AppSidebar } from "./AppSidebar"
 import { AppNavbar } from "./AppNavbar"
@@ -6,7 +8,7 @@ import { NoteCard } from "./NoteCard"
 import type { Note } from "./NoteCard"
 import { NoteModal } from "./NoteModal"
 import { AddContentModal } from "./AddContentModal"
-import { mockNotes } from "../data/mockData"
+
 import { toast } from "sonner"
 
 interface DashboardProps {
@@ -16,12 +18,33 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [activeFilter, setActiveFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [notes, setNotes] = useState<Note[]>(mockNotes)
+  const [notes, setNotes] = useState<Note[]>([])
+  const [loading, setLoading] = useState(true);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false)
+
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const token = localStorage.getItem("sb_token"); // token stored at login
+        const res = await axios.get(`${BASE_URL}/content`, {
+          headers: { Authorization: token },
+        })
+        setNotes(res.data.content);
+        console.log(res.data)
+      } catch (err) {
+        console.error("Failed to fetch notes:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotes();
+  }, []);
 
   // Filter notes based on active filter and search query
   const filteredNotes = notes.filter((note) => {
@@ -83,27 +106,12 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
   }
 
   const handleDeleteNote = (noteId: string) => {
-    setNotes(prevNotes => prevNotes.filter(note => note.id !== noteId))
+   
     toast.success('Note deleted successfully')
   }
 
   const handleToggleBookmark = (noteId: string) => {
-    setNotes(prevNotes =>
-      prevNotes.map(note =>
-        note.id === noteId
-          ? { ...note, isBookmarked: !note.isBookmarked }
-          : note
-      )
-    )
-
-    const note = notes.find(n => n.id === noteId)
-    if (note) {
-      toast.success(
-        note.isBookmarked
-          ? 'Removed from bookmarks'
-          : 'Added to bookmarks'
-      )
-    }
+    
   }
 
   const handleNoteClick = (note: Note) => {
@@ -111,48 +119,47 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
     setIsModalOpen(true)
   }
 
-  const handleUpdateUserNotes = (noteId: string, userNotes: string) => {
-    setNotes(prevNotes =>
-      prevNotes.map(note =>
-        note.id === noteId ? { ...note, userNotes } : note
-      )
-    )
-    // Update selected note if it's the one being edited
-    if (selectedNote?.id === noteId) {
-      setSelectedNote({ ...selectedNote, userNotes })
-    }
+  const handleUpdateUserNotes = (userNotes: string) => {
+    
     toast.success('Notes updated successfully')
   }
 
-  const handleAddNewContent = (newNote: {
+  const handleAddNewContent = async (newNote: {
     type: 'twitter' | 'youtube' | 'text'
     title: string
     content: string
     url?: string
     userNotes?: string
   }) => {
-    const note: Note = {
-      id: Date.now().toString(),
-      type: newNote.type,
-      title: newNote.title,
-      content: newNote.content,
-      url: newNote.url || '',
-      userNotes: newNote.userNotes,
-     
-      date: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }),
-      isBookmarked: false,
+    try {
+      const token = localStorage.getItem("sb_token");
+      const res = await axios.post(`${BASE_URL}/content`,
+        {
+          title: newNote.title,
+          content: newNote.content,
+          type: newNote.type,
+          link: newNote.url,
+          userNotes: newNote.userNotes,
+          
+        },
+        {headers: { Authorization: token }}
+      )
+      console.log(res.data)
+      toast.success('Content added successfully!')
+    } catch (err) {
+      console.log(err)
       
     }
 
-    setNotes(prevNotes => [note, ...prevNotes])
-    toast.success('Content added successfully!')
   }
 
-  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider className="w-full">

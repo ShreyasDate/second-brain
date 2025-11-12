@@ -73,8 +73,8 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
   }
 
   const renderFullEmbeddedContent = () => {
-    if (note.type === 'youtube' && note.url) {
-      const youtubeId = extractYouTubeId(note.url)
+    if (note.type === 'youtube' && note.link) {
+      const youtubeId = extractYouTubeId(note.link)
       if (youtubeId) {
         return (
           <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-6">
@@ -91,8 +91,8 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
       }
     }
 
-    if (note.type === 'twitter' && note.url) {
-      const tweetId = extractTweetId(note.url)
+    if (note.type === 'twitter' && note.link) {
+      const tweetId = extractTweetId(note.link)
       if (tweetId) {
         return (
           <div className="rounded-lg border bg-card text-card-foreground p-2 mb-6 max-w-full">
@@ -130,7 +130,7 @@ export function NoteModal({ note, isOpen, onClose, onUpdateUserNotes, isPublicVi
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(note.url, '_blank')}
+                onClick={() => window.open(note.link, '_blank')}
                 className="gap-2"
               >
                 <ExternalLinkIcon className="h-4 w-4" />

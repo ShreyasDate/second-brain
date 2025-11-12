@@ -101,74 +101,128 @@ app.post("/signin", async (req, res): Promise<void> => {
 
 
 
+// ---------- Content Routes (Fixed TypeScript Version) ----------
+
 app.post("/content", userMiddleware, async (req, res) => {
+  try {
+    const {
+      title,
+      link = "",
+      content = "",
+      type = "text",
+      date,
+      userNotes = "",
+      isBookmarked = false,
+      
+    } = req.body;
 
-    const title = req.body.title;
-    const link = req.body.link;
-
-    try {
-        await ContentModel.create({
-            title: title,
-            link: link,
-            // @ts-ignore
-            userId: req.userId,
-            tags: []
-        })
-
-        res.json({
-            message: "added Content"
-        })
-    } catch (error) {
-        res.status(403).json({
-            message: "Cant add content",
-            error: error
-        })
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ message: "Missing or invalid title" });
+      return;
     }
-})
+
+    // @ts-ignore - userMiddleware sets req.userId
+    const userId = req.userId;
+
+    const created = await ContentModel.create({
+      title,
+      link,
+      content,
+      type,
+      date,
+      userNotes,
+      isBookmarked,
+      
+      userId
+    });
+
+    res.status(201).json({ content: created });
+  } catch (error) {
+    console.error("Error creating content:", error);
+    res.status(500).json({ message: "Can't add content", error });
+  }
+});
 
 app.get("/content", userMiddleware, async (req, res) => {
-    try {
-        // @ts-ignore
-        const userId = req.userId;
+  try {
+    // @ts-ignore
+    const userId = req.userId;
+    const content = await ContentModel.find({ userId })
+      .sort({ createdAt: -1 })
+      .lean();
 
-        const content = await ContentModel.find({
-            userId: userId
-        }).populate("userId", "username")
+    res.status(200).json({ content });
+  } catch (error) {
+    console.error("Error fetching content:", error);
+    res.status(500).json({ message: "Can't get content", error });
+  }
+});
 
-        res.json({
-            content
-        })
-    } catch (error) {
-        res.status(403).json({
-            message: "Cant get content",
-            error: error
-        })
+app.patch("/content/:id", userMiddleware, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updates: any = {};
+
+    const allowed = [
+      "title",
+      "link",
+      "content",
+      "userNotes",
+      "isBookmarked",
+      "date",
+      
+      "type"
+    ];
+
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
-})
 
-app.delete("/content", userMiddleware, async (req, res) => {
-    try {
-        const contentId = req.body.contentId;
-        // @ts-ignore
-        const userId = req.userId;
+    // @ts-ignore
+    const userId = req.userId;
+    const updated = await ContentModel.findOneAndUpdate(
+      { _id: id, userId },
+      { $set: updates },
+      { new: true }
+    ).lean();
 
-        await ContentModel.deleteOne({
-            _id: contentId,
-            // @ts-ignore
-            userId: req.userId
-
-        })
-
-        res.status(200).json({
-            message: "deleted content successfully"
-        })
-    } catch (error) {
-        res.status(403).json({
-            message: "cant delete content",
-            error: error
-        })
+    if (!updated) {
+      res.status(404).json({ message: "Content not found or not owned by you" });
+      return;
     }
-})
+
+    res.status(200).json({ content: updated });
+  } catch (error) {
+    console.error("Error updating content:", error);
+    res.status(500).json({ message: "Can't update content", error });
+  }
+});
+
+app.delete("/content/:id", userMiddleware, async (req, res) => {
+  try {
+    const id = req.params.id;
+    // @ts-ignore
+    const userId = req.userId;
+
+    const result = await ContentModel.deleteOne({ _id: id, userId });
+
+    if (result.deletedCount === 0) {
+      res
+        .status(404)
+        .json({ message: "Content not found or not owned by you" });
+      return;
+    }
+
+    res.status(200).json({ message: "Deleted content successfully" });
+  } catch (error) {
+    console.error("Error deleting content:", error);
+    res.status(500).json({ message: "Can't delete content", error });
+  }
+});
+
+// ---------- End of Content Routes ----------
+
+
 
 app.post("/share", userMiddleware, async (req, res) => {
     const share = req.body.share;
