@@ -29,14 +29,13 @@ export interface Note {
 
 interface NoteCardProps {
   note: Note
-  onEdit?: (note: Note) => void
   onDelete?: (noteId: string) => void
   onClick?: (note: Note) => void
   onToggleBookmark?: (noteId: string, isBookmarked : boolean) => void
   isPublicView?: boolean
 }
 
-export function NoteCard({ note, onEdit, onDelete, onClick, onToggleBookmark, isPublicView }: NoteCardProps) {
+export function NoteCard({ note, onDelete, onClick, onToggleBookmark, isPublicView }: NoteCardProps) {
   const getTypeIcon = () => {
     switch (note.type) {
       case 'twitter':

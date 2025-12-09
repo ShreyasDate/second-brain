@@ -3,8 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Textarea } from "./ui/textarea"
-import { Twitter, Youtube, FileText, Calendar, ExternalLinkIcon, Edit3, MessageCircle, Repeat2, Heart, Share } from "lucide-react"
-import { ImageWithFallback } from './figma/ImageWithFallback'
+import { Twitter, Youtube, FileText, Calendar, ExternalLinkIcon, Edit3 } from "lucide-react"
 import { extractYouTubeId, extractTweetId } from "../utils/extractId"
 import type { Note } from './NoteCard'
 import { Tweet } from 'react-tweet'

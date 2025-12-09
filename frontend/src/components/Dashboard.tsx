@@ -8,6 +8,7 @@ import { NoteCard } from "./NoteCard"
 import type { Note } from "./NoteCard"
 import { NoteModal } from "./NoteModal"
 import { AddContentModal } from "./AddContentModal"
+import { ShareBrainModal } from "./ShareBrainModal"
 
 import { toast } from "sonner"
 
@@ -22,11 +23,11 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
   const [activeFilter, setActiveFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
-
   const [loading, setLoading] = useState(true);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false)
+  const [isShareBrainModalOpen, setIsShareBrainModalOpen] = useState(false)
 
 
   const fetchNotes = async () => {
@@ -93,20 +94,7 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
   }
 
   const handleShareBrain = () => {
-    // Generate a shareable link (mock implementation)
-    const shareId = Math.random().toString(36).substring(7)
-    const shareUrl = `${window.location.origin}?shared=${shareId}`
-
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast.success('Share link copied to clipboard!')
-    }).catch(() => {
-      toast.error('Failed to copy link')
-    })
-
-    if (onShareBrain) {
-      onShareBrain(shareId)
-    }
+    setIsShareBrainModalOpen(true)
   }
 
   const handleDeleteNote = async (id: string) => {
@@ -280,6 +268,12 @@ export function Dashboard({ onLogout, onShareBrain, userName }: DashboardProps) 
         isOpen={isAddContentModalOpen}
         onClose={() => setIsAddContentModalOpen(false)}
         onAddContent={handleAddNewContent}
+      />
+
+      <ShareBrainModal
+        isOpen={isShareBrainModalOpen}
+        onClose={() => setIsShareBrainModalOpen(false)}
+        onOpenShared={onShareBrain}
       />
     </SidebarProvider>
   )

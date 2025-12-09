@@ -14,9 +14,7 @@ import {
   Share2, 
   Sparkles,
   ArrowRight,
-  CheckCircle,
   Zap,
-  Heart,
   Star,
   Globe,
   Play,
@@ -27,7 +25,7 @@ import {
   Menu,
   Plus,
   MoreHorizontal,
-  Filter,
+  
   Code,
   Database,
   Server,

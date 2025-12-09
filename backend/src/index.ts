@@ -15,88 +15,87 @@ connectDB();
 
 const app = express();
 
-app.use(express.json())
+app.use(express.json());
 app.use(cors());
 
-
 app.post("/signup", async (req, res): Promise<void> => {
-    const emailResult = emailSchema.safeParse(req.body.email);
-    const passwordResult = passwordSchema.safeParse(req.body.password);
-    const nameResult = nameSchema.safeParse(req.body.name);
+  const emailResult = emailSchema.safeParse(req.body.email);
+  const passwordResult = passwordSchema.safeParse(req.body.password);
+  const nameResult = nameSchema.safeParse(req.body.name);
 
-    if (!emailResult.success || !passwordResult.success) {
-        res.status(400).json({
-            emailError: emailResult.success ? null : emailResult.error.errors,
-            passwordError: passwordResult.success ? null : passwordResult.error.errors,
-        });
-        return;
+  if (!emailResult.success || !passwordResult.success) {
+    res.status(400).json({
+      emailError: emailResult.success ? null : emailResult.error.errors,
+      passwordError: passwordResult.success ? null : passwordResult.error.errors,
+    });
+    return;
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(passwordResult.data, 10);
+
+    await UserModel.create({
+      name: nameResult.success ? nameResult.data : null,
+      email: emailResult.data,
+      password: hashedPassword,
+    });
+
+    res.status(201).json({ message: "Signup successful" });
+  } catch (error: any) {
+
+    if (error.code === 11000) {
+      res.status(409).json({ message: "Email already registered" });
+    } else {
+      res.status(500).json({ message: "Server error", error });
     }
-
-    try {
-        const hashedPassword = await bcrypt.hash(passwordResult.data, 10);
-
-        await UserModel.create({
-            name: nameResult.success ? nameResult.data : null,
-            email: emailResult.data,
-            password: hashedPassword,
-        });
-
-        res.status(201).json({ message: "Signup successful" });
-    } catch (error: any) {
-        
-        if (error.code === 11000) {
-            res.status(409).json({ message: "Email already registered" });
-        } else {
-            res.status(500).json({ message: "Server error", error });
-        }
-    }
+  }
 });
 
 
 
 app.post("/signin", async (req, res): Promise<void> => {
-    const emailResult = emailSchema.safeParse(req.body.email);
-    const passwordResult = passwordSchema.safeParse(req.body.password);
+  const emailResult = emailSchema.safeParse(req.body.email);
+  const passwordResult = passwordSchema.safeParse(req.body.password);
 
-    if (!emailResult.success || !passwordResult.success) {
-        res.status(400).json({
-            emailError: emailResult.success ? null : emailResult.error.errors,
-            passwordError: passwordResult.success ? null : passwordResult.error.errors,
-        });
-        return;
+  if (!emailResult.success || !passwordResult.success) {
+    res.status(400).json({
+      emailError: emailResult.success ? null : emailResult.error.errors,
+      passwordError: passwordResult.success ? null : passwordResult.error.errors,
+    });
+    return;
+  }
+
+  try {
+    const user = await UserModel.findOne({ email: emailResult.data });
+
+    if (!user) {
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
 
-    try {
-        const user = await UserModel.findOne({ email: emailResult.data });
-
-        if (!user) {
-            res.status(401).json({ message: "Invalid credentials" });
-            return;
-        }
-
-        const isMatch = await bcrypt.compare(passwordResult.data, user.password);
-        if (!isMatch) {
-            res.status(401).json({ message: "Invalid credentials" });
-            return;
-        }
-
-        const token = jwt.sign(
-            { id: user._id },
-            JWT_SECRET,
-            { expiresIn: "3d" }
-        );
-
-        res.status(200).json({
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+    const isMatch = await bcrypt.compare(passwordResult.data, user.password);
+    if (!isMatch) {
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
+
+    const token = jwt.sign(
+      { id: user._id },
+      JWT_SECRET,
+      { expiresIn: "3d" }
+    );
+
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
 });
 
 
@@ -113,7 +112,7 @@ app.post("/content", userMiddleware, async (req, res) => {
       date,
       userNotes = "",
       isBookmarked = false,
-      
+
     } = req.body;
 
     if (!title || typeof title !== "string") {
@@ -132,7 +131,7 @@ app.post("/content", userMiddleware, async (req, res) => {
       date,
       userNotes,
       isBookmarked,
-      
+
       userId
     });
 
@@ -170,7 +169,7 @@ app.patch("/content/:id", userMiddleware, async (req, res) => {
       "userNotes",
       "isBookmarked",
       "date",
-      
+
       "type"
     ];
 
@@ -224,69 +223,74 @@ app.delete("/content/:id", userMiddleware, async (req, res) => {
 
 
 
+// SHARE / UNSHARE USER'S BRAIN
 app.post("/share", userMiddleware, async (req, res) => {
-    const share = req.body.share;
+  try {
+    const { share } = req.body;
+    const userId = req.userId; // from middleware
 
-    try {
-        if (share) {
-            const userExists = await ShareModel.findOne({
-                userId: req.body.userId
-            })
+    if (share) {
+      // Check if user already has a share link
+      const existing = await ShareModel.findOne({ userId });
 
-            if (userExists) {
-                res.status(200).json({
-                    hash: userExists.hash
-                })
-                return;
-            }
-            const hash = generateRandomString(10);
-            await ShareModel.create({
-                hash: hash,
-                // @ts-ignore
-                userId: req.userId
-            })
+      if (existing) {
+        return res.status(200).json({ hash: existing.hash });
+      }
 
-            res.status(200).json({
-                hash: hash
-            })
-        } else {
-            await ShareModel.deleteOne({
-                // @ts-ignore
-                userId: req.userId
-            })
-            res.status(200).json({
-                message: "Link Deleted from DB"
-            })
-        }
-    } catch (error) {
-        res.status(403).json({
-            error
-        })
+      // Create new hash
+      const hash = generateRandomString(10);
+
+      await ShareModel.create({
+        hash,
+        userId
+      });
+
+      return res.status(200).json({ hash });
     }
+
+    // If share = false → remove the link
+    await ShareModel.deleteOne({ userId });
+
+    return res.status(200).json({ message: "Share link removed" });
+
+  } catch (error) {
+    console.error("Share error:", error);
+    res.status(500).json({ message: "Failed to process share", error });
+  }
+});
+
+
+
+app.get("/public/:shareLink", async (req, res) => {
+  const hash = req.params.shareLink;
+  try {
+    const link = await ShareModel.findOne({
+      hash: hash
+    })
+    if (!link) {
+      res.status(403).json({
+        message: "incorrect link"
+      })
+      return;
+    }
+    const content = await ContentModel.find({
+      userId: link.userId
+    }).populate("userId", "name")
+
+    res.status(200).json({
+      content
+    })
+  } catch (error) {
+    res.status(403).json({
+      error
+    })
+  }
 })
-app.get("/:shareLink", async (req, res) => {
-    const hash = req.params.shareLink;
-    try {
-        const link = await ShareModel.findOne({
-            hash: hash
-        })
-        if (!link) {
-            res.status(403).json({
-                message: "incorrect link"
-            })
-            return;
-        }
-        const content = await ContentModel.find({
-            userId: link.userId
-        }).populate("userId", "username")
 
-        res.status(200).json({
-            content
-        })
-    } catch (error) {
-        res.status(403).json({
-            error
-        })
-    }
+
+app.get("/random",async(req , res)=>{
+  res.status(200).json({
+    "message" : "visitedd"
+  })
 })
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
